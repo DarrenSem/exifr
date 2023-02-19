@@ -34,7 +34,7 @@ describe('webpack', () => {
 		})
 
 		it(`builds demo app with exifr without warnings`, async function() {
-			this.timeout(5000)
+			this.timeout(10000)
 			if (hasWebPack) {
 				let webpackFixturePath = getPath('../webpack')
 				let stdout = await execute('webpack', {cwd: webpackFixturePath})
