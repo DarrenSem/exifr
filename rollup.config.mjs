@@ -2,11 +2,10 @@ import {promises as fs} from 'fs'
 import {builtinModules} from 'module'
 import {fileURLToPath} from 'url'
 import path from 'path'
-import babel from 'rollup-plugin-babel'
-import notify from 'rollup-plugin-notify'
-import {terser} from 'rollup-plugin-terser'
+import babel from '@rollup/plugin-babel'
+import terser from '@rollup/plugin-terser'
 import * as polyfills from './src/polyfill/ie.mjs'
-import pkg from './package.json'
+const pkg = JSON.parse(await fs.readFile('package.json'))
 
 
 let exifrDir = path.dirname(fileURLToPath(import.meta.url))
@@ -136,7 +135,8 @@ const babelModern = {
 		}],
 		
 	],
-	"comments": false
+	"comments": false,
+	"babelHelpers": "bundled"
 }
 
 const babelLegacy = {
@@ -159,6 +159,7 @@ const babelLegacy = {
 		['@babel/plugin-transform-spread', {loose: true}],
 		'@babel/plugin-transform-template-literals',
 	],
+	"babelHelpers": "bundled"
 }
 
 var external = [...builtinModules, ...Object.keys(pkg.dependencies || {})]
@@ -171,7 +172,6 @@ function createLegacyBundle(inputPath, outputPath) {
 	return {
 		input: inputPath,
 		plugins: [
-			notify(),
 			replaceFile('FsReader.mjs', 'export default {}'),
 			replaceFile('import.mjs',   'export default function() {}'),
 			babel(babelLegacy),
@@ -197,7 +197,6 @@ function createModernBundle(inputPath, esmPath, umdPath) {
 	return {
 		input: inputPath,
 		plugins: [
-			notify(),
 			babel(babelModern),
 			terser(terserConfig),
 			injectIgnoreComments(),
